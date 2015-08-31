@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+	<meta name="description" content="Utilización de la API de Geoname con ReactJS" />
+	<meta name="author" content="Danny Boscan" />
+	<title>Geoplaces</title>
+
+	<link rel="author" href="https://plus.google.com/+DannyBoscan/" />
+	<link rel="stylesheet" href="https://oss.maxcdn.com/semantic-ui/2.0.8/semantic.min.css">
+</head>
+<body style="padding-top: 60px;">
+	<div class="ui top fixed menu blue inverted">
+		<a href="/" class="header item">Geoplaces</a>
+	</div>
+
+	<div class="ui grid">
+		<div class="sixteen wide mobile eight wide tablet four wide computer column centered">
+			<form action="" class="ui form">
+				<div class="field">
+					<label>Continente</label>
+					<div class="ui search selection dropdown" id="continent">
+						<input type="hidden" name="continent" />
+						<i class="dropdown icon"></i>
+						<div class="default text">Seleccione Continente</div>
+						<div class="menu">
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="contents">
+		<p>
+			<span>Continent:</span>
+			<select name="continent" id="continent2" onchange="getplaces(this.value,'country');">
+				<option value=""></option>
+			</select>
+		</p>
+		<p>
+			<span>Country:</span>
+			<select name="country" id="country" onchange="getplaces(this.value,'province');">
+				<option value=""></option>
+			</select>
+		</p>
+		<p>
+			<span>State / Provice:</span>
+			<select name="province" id="province" onchange="getplaces(this.value,'region')">
+				<option value=""></option>
+			</select>
+		</p>
+		<p>
+			<span>County / Region:</span>
+			<select name="region" id="region" onchange="getplaces(this.value,'city')">
+				<option value=""></option>
+			</select>
+		</p>
+		<p>
+			<span>City / Comuna:</span>
+			<select name="city" id="city">
+				<option value=""></option>
+			</select>
+		</p>
+	</div>
+
+	<script>
+		function JSONscriptRequest(fullUrl) {
+			this.fullUrl = fullUrl; 
+			this.noCacheIE = '&noCacheIE=' + (new Date()).getTime();
+			this.headLoc = document.getElementsByTagName("head").item(0);
+			this.scriptId = 'YJscriptId' + JSONscriptRequest.scriptCounter++;
+		}
+
+		JSONscriptRequest.scriptCounter = 1;
+
+		JSONscriptRequest.prototype.buildScriptTag = function () {
+
+			this.scriptObj = document.createElement("script");
+
+			this.scriptObj.setAttribute("type", "text/javascript");
+			this.scriptObj.setAttribute("src", this.fullUrl + this.noCacheIE);
+			this.scriptObj.setAttribute("id", this.scriptId);
+		};
+
+		JSONscriptRequest.prototype.removeScriptTag = function () {
+			this.headLoc.removeChild(this.scriptObj);  
+		};
+
+		JSONscriptRequest.prototype.addScriptTag = function () {
+			this.headLoc.appendChild(this.scriptObj);
+		};
+
+		var whos=null;
+		function getplaces(gid,src)
+		{	
+			whos = src;
+
+			var request = "http://www.geonames.org/childrenJSON?geonameId="+gid+"&callback=listPlaces&style=long";
+			aObj = new JSONscriptRequest(request);
+			aObj.buildScriptTag();
+			aObj.addScriptTag();	
+		}
+
+		function listPlaces(jData)
+		{
+			counts = jData.geonames.length<jData.totalResultsCount ? jData.geonames.length : jData.totalResultsCount;
+			who = document.getElementById(whos);
+			who.options.length = 0;
+
+			if(counts)who.options[who.options.length] = new Option('Select','');
+			else who.options[who.options.length] = new Option('No Data Available','NULL');
+			
+			for(var i=0;i<counts;i++)
+				who.options[who.options.length] = new Option(jData.geonames[i].name,jData.geonames[i].geonameId);
+
+			delete jData;
+			jData = null;
+		}
+
+		window.onload = function() { getplaces(6295630,'continent2'); }
+	</script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script src="https://oss.maxcdn.com/semantic-ui/2.0.8/semantic.min.js"></script>
+	<script src="js/bundle.js"></script>
+</body>
+</html>
